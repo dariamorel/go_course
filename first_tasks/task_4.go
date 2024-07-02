@@ -3,8 +3,11 @@ package main
 import "fmt"
 
 func main() {
-	var a, b, c int
-	fmt.Scan(&a, &b, &c)
-	ans := max(a, b, c)
+	var number int
+	fmt.Scan(&number)
+	ans := 1
+	for i := 2; i < number+1; i++ {
+		ans *= i
+	}
 	fmt.Println(ans)
 }
