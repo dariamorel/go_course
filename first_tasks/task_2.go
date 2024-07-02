@@ -6,5 +6,5 @@ func main() {
 	var a int
 	var b int
 	fmt.Scan(&a, &b)
-	fmt.Println(a + b)
+	fmt.Print(a + b)
 }
