@@ -11,11 +11,12 @@ import (
 )
 
 type Command struct {
-	Port   int
-	Host   string
-	Cmd    string
-	Name   string
-	Amount int
+	Port    int
+	Host    string
+	Cmd     string
+	Name    string
+	NewName string
+	Amount  int
 }
 
 // ДОДЕЛАТЬ В КОНЦЕ
@@ -37,16 +38,18 @@ func main() {
 	hostVal := flag.String("host", "0.0.0.0", "server host")
 	cmdVal := flag.String("cmd", "", "command to execute")
 	nameVal := flag.String("name", "", "name of account")
+	newNameVal := flag.String("new_name", "", "new name of account")
 	amountVal := flag.Int("amount", 0, "amount of account")
 
 	flag.Parse()
 
 	cmd := Command{
-		Port:   *portVal,
-		Host:   *hostVal,
-		Cmd:    *cmdVal,
-		Name:   *nameVal,
-		Amount: *amountVal,
+		Port:    *portVal,
+		Host:    *hostVal,
+		Cmd:     *cmdVal,
+		Name:    *nameVal,
+		NewName: *newNameVal,
+		Amount:  *amountVal,
 	}
 
 	if err := do(cmd); err != nil {
@@ -71,6 +74,18 @@ func do(cmd Command) error {
 	case "patch":
 		if err := patch(cmd); err != nil {
 			return fmt.Errorf("patch account failed: %w", err)
+		}
+
+		return nil
+	case "change":
+		if err := change(cmd); err != nil {
+			return fmt.Errorf("change account failed: %w", err)
+		}
+
+		return nil
+	case "delete":
+		if err := delete(cmd); err != nil {
+			return fmt.Errorf("delete account failed: %w", err)
 		}
 
 		return nil
@@ -165,6 +180,79 @@ func patch(cmd Command) error {
 
 	if err != nil {
 		return fmt.Errorf("http patch failed: %w", err)
+	}
+
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
+	if resp.StatusCode == http.StatusOK {
+		return nil
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("read body failed: %w", err)
+	}
+
+	return fmt.Errorf("resp error %s", string(body))
+}
+
+func change(cmd Command) error {
+	request := dto.ChangeAccountRequest{
+		Name:    cmd.Name,
+		NewName: cmd.NewName,
+	}
+
+	data, err := json.Marshal(request)
+	if err != nil {
+		return fmt.Errorf("json marshal failed: %w", err)
+	}
+
+	resp, err := http.Post(
+		fmt.Sprintf("http://%s:%d/account/change", cmd.Host, cmd.Port),
+		"application/json",
+		bytes.NewReader(data),
+	)
+
+	if err != nil {
+		return fmt.Errorf("http change failed: %w", err)
+	}
+
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
+	if resp.StatusCode == http.StatusOK {
+		return nil
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("read body failed: %w", err)
+	}
+
+	return fmt.Errorf("resp error %s", string(body))
+}
+
+func delete(cmd Command) error {
+	request := dto.DeleteAccountRequest{
+		Name: cmd.Name,
+	}
+
+	data, err := json.Marshal(request)
+	if err != nil {
+		return fmt.Errorf("json marshal failed: %w", err)
+	}
+
+	resp, err := http.Post(
+		fmt.Sprintf("http://%s:%d/account/delete", cmd.Host, cmd.Port),
+		"application/json",
+		bytes.NewReader(data),
+	)
+
+	if err != nil {
+		return fmt.Errorf("http delete failed: %w", err)
 	}
 
 	defer func() {
