@@ -32,6 +32,10 @@ func (h *Handler) CreateAccount(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "empty name")
 	}
 
+	if request.Amount < 0 {
+		return c.String(http.StatusBadRequest, "negative amount")
+	}
+
 	h.guard.Lock()
 
 	if _, ok := h.accounts[request.Name]; ok {
@@ -77,8 +81,38 @@ func (h *Handler) DeleteAccount(c echo.Context) error {
 }
 
 // Меняет баланс
-func (h *Handler) PathAccount(c echo.Context) error {
-	panic("implement me")
+func (h *Handler) PatchAccount(c echo.Context) error {
+	var request dto.PatchAccountRequest // {"name": "alice", "amount": 20}
+
+	if err := c.Bind(&request); err != nil {
+		c.Logger().Error(err)
+
+		return c.String(http.StatusBadRequest, "invalid request")
+	}
+
+	if len(request.Name) == 0 {
+		return c.String(http.StatusBadRequest, "empty name")
+	}
+
+	if request.Amount < 0 {
+		return c.String(http.StatusBadRequest, "negative amount")
+	}
+
+	h.guard.Lock()
+
+	account, ok := h.accounts[request.Name]
+
+	if !ok {
+		h.guard.Unlock()
+
+		return c.String(http.StatusNotFound, "account not found")
+	}
+
+	account.Amount = request.Amount
+
+	h.guard.Unlock()
+
+	return c.NoContent(http.StatusOK)
 }
 
 // Меняет имя

@@ -18,6 +18,7 @@ type Command struct {
 	Amount int
 }
 
+// ДОДЕЛАТЬ В КОНЦЕ
 func (c *Command) Do() error {
 	switch c.Cmd {
 	case "create":
@@ -64,6 +65,12 @@ func do(cmd Command) error {
 	case "get":
 		if err := get(cmd); err != nil {
 			return fmt.Errorf("get account failed: %w", err)
+		}
+
+		return nil
+	case "patch":
+		if err := patch(cmd); err != nil {
+			return fmt.Errorf("patch account failed: %w", err)
 		}
 
 		return nil
@@ -128,6 +135,43 @@ func create(cmd Command) error {
 	}()
 
 	if resp.StatusCode == http.StatusCreated {
+		return nil
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("read body failed: %w", err)
+	}
+
+	return fmt.Errorf("resp error %s", string(body))
+}
+
+func patch(cmd Command) error {
+	request := dto.PatchAccountRequest{
+		Name:   cmd.Name,
+		Amount: cmd.Amount,
+	}
+
+	data, err := json.Marshal(request)
+	if err != nil {
+		return fmt.Errorf("json marshal failed: %w", err)
+	}
+
+	resp, err := http.Post(
+		fmt.Sprintf("http://%s:%d/account/patch", cmd.Host, cmd.Port),
+		"application/json",
+		bytes.NewReader(data),
+	)
+
+	if err != nil {
+		return fmt.Errorf("http patch failed: %w", err)
+	}
+
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
+	if resp.StatusCode == http.StatusOK {
 		return nil
 	}
 

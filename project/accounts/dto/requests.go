@@ -6,7 +6,8 @@ type CreateAccountRequest struct {
 }
 
 type PatchAccountRequest struct {
-	Name string `json:"name"`
+	Name   string `json:"name"`
+	Amount int    `json:"amount"`
 }
 
 type ChangeAccountRequest struct {
