@@ -168,7 +168,18 @@ func (h *Handler) ChangeAccount(c echo.Context) error {
 		return c.String(http.StatusNotFound, "account not found")
 	}
 
-	account.Name = request.NewName
+	if _, ok := h.accounts[request.NewName]; ok {
+		h.guard.Unlock()
+
+		return c.String(http.StatusForbidden, "name is already taken")
+	}
+
+	amount := account.Amount
+	delete(h.accounts, request.Name)
+	h.accounts[request.NewName] = &models.Account{
+		Name:   request.NewName,
+		Amount: amount,
+	}
 
 	h.guard.Unlock()
 
