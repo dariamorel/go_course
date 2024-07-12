@@ -4,14 +4,54 @@ option go_package = "project/proto";
 
 package proto;
 
-service Greeter {
-  rpc SayHello (HelloRequest) returns (HelloReply) {}
+service Bank {
+  rpc CreateAccount (CreateAccountRequest) returns (CreateAccountResponse) {}
+  rpc GetAccount (GetAccountRequest) returns (GetAccountResponse) {}
+  rpc ChangeAccount (ChangeAccountRequest) returns (ChangeAccountResponse) {}
+  rpc PatchAccount (PatchAccountRequest) returns (PatchAccountResponse) {}
+  rpc DeleteAccount (DeleteAccountRequest) returns (DeleteAccountResponse) {}
 }
 
-message HelloRequest {
+message CreateAccountRequest {
+  string name = 1;
+  int32 amount = 2;
+}
+
+message CreateAccountResponse {
+  string res = 1;
+}
+
+message GetAccountRequest {
   string name = 1;
 }
 
-message HelloReply {
-  string message  = 1;
+message GetAccountResponse {
+  string name = 1;
+  int32 amount = 2;
+}
+
+message PatchAccountRequest {
+  string name = 1;
+  int32 amount = 2;
+}
+
+message PatchAccountResponse {
+  string res = 1;
+}
+
+message ChangeAccountRequest {
+  string name = 1;
+  string newName = 2;
+}
+
+message ChangeAccountResponse {
+  string res = 1;
+}
+
+message DeleteAccountRequest {
+  string name = 1;
+}
+
+message DeleteAccountResponse {
+  string res = 1;
 }
