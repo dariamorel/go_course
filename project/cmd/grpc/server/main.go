@@ -17,6 +17,13 @@ type server struct {
 	guard    *sync.RWMutex
 }
 
+func (s *server) New() *server {
+	return &server{
+		accounts: make(map[string]*models.Account),
+		guard:    &sync.RWMutex{},
+	}
+}
+
 func (s *server) CreateAccount(ctx context.Context, req *proto.CreateAccountRequest) (*proto.CreateAccountResponse, error) {
 	if len(req.GetName()) == 0 {
 		return nil, errors.New("empty name")

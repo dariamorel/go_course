@@ -101,7 +101,7 @@ func (c *Command) Patch(conn *grpc.ClientConn) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	_, err := cl.GetAccount(ctx, &proto.GetAccountRequest{Name: c.Name})
+	_, err := cl.PatchAccount(ctx, &proto.PatchAccountRequest{Name: c.Name, Amount: int32(c.Amount)})
 	if err != nil {
 		panic(err)
 	}
@@ -115,7 +115,7 @@ func (c *Command) Change(conn *grpc.ClientConn) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	_, err := cl.GetAccount(ctx, &proto.GetAccountRequest{Name: c.Name})
+	_, err := cl.ChangeAccount(ctx, &proto.ChangeAccountRequest{Name: c.Name, NewName: c.NewName})
 	if err != nil {
 		panic(err)
 	}
@@ -129,7 +129,7 @@ func (c *Command) Delete(conn *grpc.ClientConn) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	_, err := cl.GetAccount(ctx, &proto.GetAccountRequest{Name: c.Name})
+	_, err := cl.DeleteAccount(ctx, &proto.DeleteAccountRequest{Name: c.Name})
 	if err != nil {
 		panic(err)
 	}
